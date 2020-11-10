@@ -96,8 +96,10 @@ public void onComplete(@NonNull Task<AuthResult> task) {
         startActivity(new Intent(DriverLoginActivity.this,DriverProfileCompletionActivity.class));
         Toast.makeText(DriverLoginActivity.this,"Verification Done",Toast.LENGTH_SHORT).show();
         String user_id = mAuth.getCurrentUser().getUid();
-        DatabaseReference current_user_db = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child("UID");
-        current_user_db.setValue(user_id);
+        DatabaseReference current_user_db= FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id);
+        current_user_db.setValue(true);
+        DatabaseReference current_user_ph= FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("Phoneno");
+        current_user_ph.setValue(mphno.getText().toString());
         }
         else {
         if(task.getException() instanceof FirebaseAuthInvalidCredentialsException){

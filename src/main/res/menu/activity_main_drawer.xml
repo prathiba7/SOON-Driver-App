@@ -14,15 +14,12 @@
         <item
             android:id="@+id/nav_report"
             android:icon="@drawable/ic_baseline_touch_app_24"
-            android:title="Report Accident" />
+            android:title="Notifications" />
         <item
             android:id="@+id/nav_about"
             android:icon="@drawable/ic_baseline_info_24"
             android:title="About Us" />
-        <item
-            android:id="@+id/nav_map"
-            android:icon="@drawable/ic_baseline_info_24"
-            android:title="map" />
+
 
 
     </group>

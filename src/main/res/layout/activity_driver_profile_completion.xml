@@ -36,33 +36,8 @@
         android:layout_marginRight="10dp"
         android:inputType="textPostalAddress"
         />
-    <EditText
-        android:id="@+id/contactno"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:hint="Enter Contact No"
-        android:layout_marginRight="10dp"
-        android:inputType="phone"
-        />
-    <EditText
-        android:id="@+id/email"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:hint="Enter mail"
-        android:layout_marginRight="10dp"
-        android:inputType="textEmailAddress"
-        />
-    <EditText
-        android:id="@+id/yearofexperiance"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:hint="Enter year of experience"
-        android:layout_marginRight="10dp"
-        android:inputType="number"
-        />
+
+
     <EditText
         android:id="@+id/vehno"
         android:layout_width="match_parent"
@@ -70,7 +45,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:hint="Enter Vehicle no"
-        android:inputType="number"
+        android:inputType="text"
         />
     <Button
         android:layout_width="match_parent"

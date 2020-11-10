@@ -14,7 +14,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class DriverProfileCompletionActivity extends AppCompatActivity {
-    private EditText name,email,address,contactno,yearofexperiance,vehno;
+    private EditText name,address,vehno;
     Button save;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,9 +22,7 @@ public class DriverProfileCompletionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_driver_profile_completion);
         name=(EditText)findViewById(R.id.name);
         address=(EditText)findViewById(R.id.address);
-        contactno=(EditText)findViewById(R.id.contactno);
-        email=(EditText)findViewById(R.id.email);
-        yearofexperiance=(EditText)findViewById(R.id.yearofexperiance);
+
         vehno=(EditText)findViewById(R.id.vehno);
         save=(Button)findViewById(R.id.save_button);
         save.setOnClickListener(new View.OnClickListener(){
@@ -37,15 +35,13 @@ public class DriverProfileCompletionActivity extends AppCompatActivity {
                  current_user_name.setValue(name.getText().toString());
                 DatabaseReference current_user_address = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("Address");
                 current_user_address.setValue(address.getText().toString());
-                DatabaseReference current_user_contactno = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("ContactNo");
-                current_user_contactno.setValue(contactno.getText().toString());
-                DatabaseReference current_user_email = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("Email");
-                current_user_email.setValue(email.getText().toString());
-                DatabaseReference current_user_yearofexperiance= FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("YearOfExperiance");
-                current_user_yearofexperiance.setValue(yearofexperiance.getText().toString());
+
+
                 DatabaseReference current_user_vehno = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("VehicleNo");
                 current_user_vehno.setValue(vehno.getText().toString());
-                startActivity(new Intent(DriverProfileCompletionActivity.this, DriverHome.class));
+                DatabaseReference dr=FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id);
+                dr.child("Available").setValue("off");
+                startActivity(new Intent(DriverProfileCompletionActivity.this,DriverHome.class));
                 finish();
                 return;
             }
