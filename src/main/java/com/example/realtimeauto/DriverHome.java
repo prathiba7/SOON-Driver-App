@@ -280,10 +280,14 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
         LatLng latLng=new LatLng(location.getLatitude(),location.getLongitude());
         final MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
+
+
+
         markerOptions.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher_auto));
         markerOptions.title("driver");
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
+        
         mMap.addMarker(markerOptions);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String userid=user.getUid();
@@ -412,12 +416,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
 
     @Override
     public void onRoutingFailure(RouteException e) {
-        if(e != null) {
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-        else{
-            Toast.makeText(this, "some error occured", Toast.LENGTH_LONG).show();
-        }
+
     }
 
     @Override
