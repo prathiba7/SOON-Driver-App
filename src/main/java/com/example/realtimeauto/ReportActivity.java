@@ -42,8 +42,8 @@ public class ReportActivity extends AppCompatActivity {
         setContentView(R.layout.activity_report);
         final MediaPlayer alert=MediaPlayer.create(this,R.raw.alert);
         alert.start();
-        accept=(Button)findViewById(R.id.button2);
-        Decline=(Button)findViewById(R.id.button3);
+        accept=(Button)findViewById(R.id.rptbutton1);
+        Decline=(Button)findViewById(R.id.rptbutton2);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         final String user_id = user.getUid();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
@@ -66,7 +66,7 @@ public class ReportActivity extends AppCompatActivity {
                                         .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                                             @Override
                                             public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                                                Toast.makeText(getApplication(),"retreived",Toast.LENGTH_SHORT).show();
+
                                                 Bitmap bitmap= BitmapFactory.decodeFile(LocalFile.getAbsolutePath());
                                                 ( (ImageView)findViewById(R.id.reportimage))
                                                         .setImageBitmap(bitmap);
@@ -103,6 +103,9 @@ public class ReportActivity extends AppCompatActivity {
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent=new Intent(ReportActivity.this,DriverHome.class);
+
+                startActivity(intent);
                 DatabaseReference riderref = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("CurrentRequest");
                 Query query=riderref.orderByChild("Status").equalTo("Requested");
                 ValueEventListener valueEventListener=new ValueEventListener() {
@@ -113,27 +116,7 @@ public class ReportActivity extends AppCompatActivity {
                                 key=ds.getKey();
                                 if(key!=null){
                                     DatabaseReference checksts=FirebaseDatabase.getInstance().getReference();
-                                    checksts.child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key).addValueEventListener(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                            if(snapshot.exists()){
-
-
-                                                Intent intent=new Intent(ReportActivity.this,DriverHome.class);
-
-                                                startActivity(intent);
-                                                DatabaseReference setsts=FirebaseDatabase.getInstance().getReference();
-                                                setsts.child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key).child("Status").setValue("Accepted");
-
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                        }
-                                    });
-
+                                    checksts.child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key).child("Status").setValue("Accepted");
                                 }
                             }
                         }
@@ -156,8 +139,11 @@ public class ReportActivity extends AppCompatActivity {
         Decline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent=new Intent(ReportActivity.this,DriverHome.class);
+
+                startActivity(intent);
                 DatabaseReference riderref = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("CurrentRequest");
-                Query query=riderref.orderByChild("Status").equalTo("Declined");
+                Query query=riderref.orderByChild("Status").equalTo("Requested");
                 ValueEventListener valueEventListener=new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -166,24 +152,7 @@ public class ReportActivity extends AppCompatActivity {
                                 key=ds.getKey();
                                 if(key!=null){
                                     DatabaseReference checksts=FirebaseDatabase.getInstance().getReference();
-                                    checksts.child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key).addValueEventListener(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                            if(snapshot.exists()){
-                                                Intent intent=new Intent(ReportActivity.this,DriverHome.class);
-
-                                                startActivity(intent);
-                                                DatabaseReference setsts=FirebaseDatabase.getInstance().getReference();
-                                                setsts.child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key).child("Status").setValue("Declined");
-
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                        }
-                                    });
+                                    checksts.child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key).child("Status").setValue("Declined");
 
                                 }
                             }

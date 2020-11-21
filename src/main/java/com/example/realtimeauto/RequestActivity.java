@@ -34,9 +34,9 @@ public class RequestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_request);
         final MediaPlayer alert=MediaPlayer.create(this,R.raw.alert);
         alert.start();
-        ripple=(RippleBackground)findViewById(R.id.ripple);
 
-        ripple.startRippleAnimation();
+
+
         accept=(Button)findViewById(R.id.button2);
         Decline=(Button)findViewById(R.id.button3);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -49,6 +49,9 @@ public class RequestActivity extends AppCompatActivity {
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent=new Intent(RequestActivity.this,DriverHome.class);
+
+                startActivity(intent);
                 DatabaseReference riderref = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("CurrentRequest");
                 Query query=riderref.orderByChild("Status").equalTo("Requested");
                 ValueEventListener valueEventListener=new ValueEventListener() {
@@ -59,32 +62,7 @@ public class RequestActivity extends AppCompatActivity {
                                  key=ds.getKey();
                                 if(key!=null){
                                     DatabaseReference checksts=FirebaseDatabase.getInstance().getReference();
-                                    checksts.child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key).addValueEventListener(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                            if(snapshot.exists()){
-
-
-                                                    Intent intent=new Intent(RequestActivity.this,DriverHome.class);
-
-                                                    startActivity(intent);
-                                                     ripple.stopRippleAnimation();
-
-                                                DatabaseReference setsts=FirebaseDatabase.getInstance().getReference();
-                                                setsts.child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key).child("Status").setValue("Accepted");
-                                                finish();
-                                                return;
-
-
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                        }
-                                    });
-
+                                    checksts.child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key).child("Status").setValue("Accepted");
                                 }
                             }
                         }
@@ -107,8 +85,11 @@ public class RequestActivity extends AppCompatActivity {
         Decline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent1=new Intent(RequestActivity.this,DriverHome.class);
+
+                startActivity(intent1);
                 DatabaseReference riderref = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("CurrentRequest");
-                Query query=riderref.orderByChild("Status").equalTo("Declined");
+                Query query=riderref.orderByChild("Status").equalTo("Requested");
                 ValueEventListener valueEventListener=new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -117,28 +98,7 @@ public class RequestActivity extends AppCompatActivity {
                                  key=ds.getKey();
                                 if(key!=null){
                                     DatabaseReference checksts=FirebaseDatabase.getInstance().getReference();
-                                    checksts.child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key).addValueEventListener(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                            if(snapshot.exists()){
-                                                Intent intent=new Intent(RequestActivity.this,DriverHome.class);
-
-                                                startActivity(intent);
-                                                 ripple.stopRippleAnimation();
-                                                DatabaseReference setsts=FirebaseDatabase.getInstance().getReference();
-                                                setsts.child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key).child("Status").setValue("Declined");
-                                                finish();
-                                                return;
-
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                        }
-                                    });
-
+                                    checksts.child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key).child("Status").setValue("Declined");
                                 }
                             }
                         }

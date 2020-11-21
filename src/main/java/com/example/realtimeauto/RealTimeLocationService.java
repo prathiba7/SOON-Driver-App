@@ -7,9 +7,9 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -17,6 +17,8 @@ import androidx.core.content.ContextCompat;
 
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,7 +35,7 @@ public class RealTimeLocationService extends Service implements LocationListener
     String key;
     String str;
     String requestId="";
-    Button togle;
+    boolean check=true;
     private StorageReference mStorageReference;
     ImageView img;
 
@@ -52,8 +54,8 @@ public class RealTimeLocationService extends Service implements LocationListener
     public int onStartCommand(Intent intent, int flags, int startId) {
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED) {
-           mLastLocation=mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-           mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,(android.location.LocationListener)this);
+           mLastLocation=mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+           mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,(android.location.LocationListener)this);
         }
         return START_STICKY;
     }
@@ -125,19 +127,31 @@ public class RealTimeLocationService extends Service implements LocationListener
                                         String sts=snapshot.child("Status").getValue().toString();
                                         if(sts.equals("Requested")){
                                             mStorageReference= FirebaseStorage.getInstance().getReference().child("Reports").child(key+".jpeg");
-                                            if(mStorageReference!=null) {
-                                                Intent intent = new Intent(RealTimeLocationService.this, ReportActivity.class)
-                                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                startActivity(intent);
+                                            mStorageReference.getDownloadUrl()
+                                                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                        @Override
+                                                        public void onSuccess(Uri uri) {
+                                                            Intent intent = new Intent(RealTimeLocationService.this, ReportActivity.class)
+                                                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                            startActivity(intent);
 
-                                                return;
-                                            }else{
-                                                Intent intent = new Intent(RealTimeLocationService.this, RequestActivity.class)
-                                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-                                                startActivity(intent);
-                                                return;
-                                            }
+
+                                                        }
+                                                    }).addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    Intent intent1 = new Intent(RealTimeLocationService.this, RequestActivity.class)
+                                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+
+                                                    startActivity(intent1);
+
+
+
+
+                                                }
+                                            });
                                         }
 
                                     }

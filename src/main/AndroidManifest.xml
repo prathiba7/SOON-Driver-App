@@ -52,7 +52,6 @@
             android:resource="@drawable/side_nav_bar" />
 
         <activity android:name=".NavHeaderMainActivity" />
-        <activity android:name=".DriverProfileActivity" />
         <activity android:name=".DriverProfileCompletionActivity" />
         <activity android:name=".DriverHome" />
         <activity android:name=".LogAsActivity" />

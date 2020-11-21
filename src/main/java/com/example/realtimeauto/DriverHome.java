@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -57,6 +58,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +83,13 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
     private SupportMapFragment mapFragment;
     GoogleApiClient mGoogleApiClient;
     String key1;
-
+    StorageReference mStorageReference;
+    String key;
+    Button completebtn;
+    Button mapbtn;
+    LatLng riderLatLng;
+    double locationLat=0;
+    double locationLng=0;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -100,9 +108,24 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
         imageView = (ImageView) header.findViewById(R.id.nav_img);
         name = (TextView) header.findViewById(R.id.username);
         phone = (TextView) header.findViewById(R.id.userphone);
+        mapbtn=(Button)findViewById(R.id.mapbtn);
+        completebtn=(Button)findViewById(R.id.completebtn);
 
         sw = (Switch) findViewById(R.id.switch5);
 
+        completebtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+             completebtn.setVisibility(View.GONE);
+             mapbtn.setVisibility(View.GONE);
+            }
+        });
+        mapbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //showroute(riderLatLng,mLastLocation);
+            }
+        });
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         final Intent intentlocservice = new Intent(this, RealTimeLocationService.class);
@@ -139,6 +162,22 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
 
 
                 }
+
+            }
+        });
+        DatabaseReference dr = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("Available");
+        dr.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue().equals("on")){
+                    frameMap.setVisibility(View.VISIBLE);
+                    frameLayout.setVisibility(View.GONE);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
             }
         });
@@ -290,7 +329,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
         
         mMap.addMarker(markerOptions);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String userid=user.getUid();
+        final String userid=user.getUid();
 
         DatabaseReference dr1 = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(userid).child("Available");
         if(dr1!=null) {
@@ -318,12 +357,14 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
 
         }
 
-         driver=FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference riderref = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driver).child("CurrentRequest");
+      
 
-        Query query=riderref.orderByChild("Status").equalTo("Accepted");
-        if (riderref!=null) {
-            ValueEventListener valueEventListener = new ValueEventListener() {
+         driver=FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference rider = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driver).child("CurrentRequest");
+
+        Query query=rider.orderByChild("Status").equalTo("Accepted");
+        if (rider!=null) {
+            ValueEventListener valueEventListener1 = new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists()) {
@@ -338,6 +379,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
                                             String sts = snapshot.child("Status").getValue().toString();
                                             if (sts.equals("Accepted")) {
                                                 getRiderLocation();
+
                                             }
 
                                         }
@@ -359,33 +401,42 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
 
                 }
             };
-            query.addListenerForSingleValueEvent(valueEventListener);
+            query.addListenerForSingleValueEvent(valueEventListener1);
         }
 
     }
 
+   /* private void showroute(LatLng riderLatLng, Location mLastLocation) {
+        Uri uri=Uri.parse("https://www.google.co.in/maps/dir/"+mLastLocation.getLatitude()+","+mLastLocation.getLongitude()+"/"+locationLat+","+locationLng);
+        Intent intent =new Intent(Intent.ACTION_VIEW,uri);
+        intent.setPackage("com.google.android.apps.maps");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }*/
+
     public  void getRiderLocation(){
+        completebtn.setVisibility(View.VISIBLE);
+        mapbtn.setVisibility(View.VISIBLE);
         DatabaseReference assignedRiderPickupLocationRef=FirebaseDatabase.getInstance().getReference().child("Requests").child(key1).child("l");
         assignedRiderPickupLocationRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
                     List<Object> map=(List<Object>)snapshot.getValue();
-                    double locationLat=0;
-                    double locationLng=0;
+
                     if(map.get(0) != null){
                         locationLat = Double.parseDouble(map.get(0).toString());
                     }
                     if(map.get(1) != null){
                         locationLng = Double.parseDouble(map.get(1).toString());
                     }
-                    LatLng riderLatLng = new LatLng(locationLat,locationLng);
+                     riderLatLng = new LatLng(locationLat,locationLng);
                     final MarkerOptions markerOptions = new MarkerOptions();
                     markerOptions.position(riderLatLng);
                     markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                     markerOptions.title("Rider");
                     mMap.addMarker(markerOptions);
-                    getRouteToRider(riderLatLng);
+
 
 
                 }
