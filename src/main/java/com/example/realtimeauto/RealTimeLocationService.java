@@ -54,8 +54,8 @@ public class RealTimeLocationService extends Service implements LocationListener
     public int onStartCommand(Intent intent, int flags, int startId) {
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         if (ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED) {
-           mLastLocation=mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-           mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,(android.location.LocationListener)this);
+           mLastLocation=mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+           mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,(android.location.LocationListener)this);
         }
         return START_STICKY;
     }

@@ -42,8 +42,8 @@ public class ReportActivity extends AppCompatActivity {
         setContentView(R.layout.activity_report);
         final MediaPlayer alert=MediaPlayer.create(this,R.raw.alert);
         alert.start();
-        accept=(Button)findViewById(R.id.rptbutton1);
-        Decline=(Button)findViewById(R.id.rptbutton2);
+        accept=(Button)findViewById(R.id.Accept);
+        Decline=(Button)findViewById(R.id.Decline);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         final String user_id = user.getUid();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);

@@ -1,9 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-soon"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AboutFragmentActivity">
+    android:orientation="vertical"
+    tools:context=".AboutFragmentActivity" >
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+    <TextView
+
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginTop="80dp"
+        android:text="Instruction to use:"
+        android:textColor="#5C5959"
+        android:textSize="20sp" />
+    <LinearLayout
+        android:layout_height="60dp"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:gravity="start">
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="start"
+            android:src="@drawable/ic_baseline_toggle_on_24"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginTop="9dp"
+            android:layout_marginLeft="10dp"
+            android:text="Enable the Toggle Switch to receive Request"
+            android:textColor="#5C5959"
+            android:textSize="18sp" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_height="60dp"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:gravity="start">
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+
+
+            android:layout_gravity="start"
+            android:src="@drawable/ic_baseline_toggle_off_24"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginLeft="10dp"
+            android:text="Disable the Toggle Switch,If you are not Available"
+            android:textColor="#5C5959"
+            android:textSize="18sp" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_height="60dp"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:gravity="start">
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="start"
+            android:src="@drawable/ic_baseline_touch_app_24"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:text="Tap on Navigate Button, to show route map"
+            android:textColor="#5C5959"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_height="80dp"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:gravity="start">
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="start"
+            android:src="@drawable/ic_baseline_touch_app_24"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:layout_marginTop="9dp"
+            android:layout_marginLeft="10dp"
+            android:text="After Completing the request,Tap on complete button"
+            android:textColor="#5C5959"
+            android:textSize="18sp" />
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="10dp"
+        android:text="Note:Make sure to give all app permission before you start."
+        android:textColor="#5C5959"
+        android:textSize="18sp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</LinearLayout>
