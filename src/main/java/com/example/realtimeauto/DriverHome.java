@@ -15,7 +15,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -43,6 +42,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
@@ -83,6 +83,8 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
       String key1;
     private StorageReference mStorageReference;
     BottomNavigationView bottomNavigationView;
+     Marker ridermarker;
+     Boolean check=true;
 
 
 
@@ -323,22 +325,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
-    private void removeRequest() {
 
-        DatabaseReference d = FirebaseDatabase.getInstance().getReference().child("Requests").child(key1);
-        Toast.makeText(this,key1,Toast.LENGTH_SHORT);
-        d.removeValue();
-        DatabaseReference rider1 = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driver).child("CurrentRequest");
-        rider1.removeValue();
-
-
-        bottomNavigationView.setVisibility(View.GONE);
-        mStorageReference= FirebaseStorage.getInstance().getReference().child("Reports").child(key1+".jpeg");
-        if(mStorageReference!=null){
-            mStorageReference.delete();
-        }
-
-    }
     public void  RiderDetails(){
 
         final AlertDialog.Builder dialog=new AlertDialog.Builder(this);
@@ -395,7 +382,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
         markerOptions.title("driver");
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
-        
+
         mMap.addMarker(markerOptions);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         final String userid=user.getUid();
@@ -426,7 +413,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
 
         }
 
-      
+
 
          driver=FirebaseAuth.getInstance().getCurrentUser().getUid();
         DatabaseReference rider = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driver).child("CurrentRequest");
@@ -485,36 +472,40 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
         bottomNavigationView.setVisibility(View.VISIBLE);
 
         DatabaseReference assignedRiderPickupLocationRef=FirebaseDatabase.getInstance().getReference().child("Requests").child(key1).child("l");
-        assignedRiderPickupLocationRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()){
-                    List<Object> map=(List<Object>)snapshot.getValue();
 
-                    if(map.get(0) != null){
-                        locationLat = Double.parseDouble(map.get(0).toString());
+            assignedRiderPickupLocationRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        List<Object> map = (List<Object>) snapshot.getValue();
+
+                        if (map.get(0) != null) {
+                            locationLat = Double.parseDouble(map.get(0).toString());
+                        }
+                        if (map.get(1) != null) {
+                            locationLng = Double.parseDouble(map.get(1).toString());
+                        }
+                        riderLatLng = new LatLng(locationLat, locationLng);
+
+                        ridermarker = mMap.addMarker(new MarkerOptions()
+                        .position(riderLatLng)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                                .title("Rider")
+                        );
+
+
+
+
                     }
-                    if(map.get(1) != null){
-                        locationLng = Double.parseDouble(map.get(1).toString());
-                    }
-                     riderLatLng = new LatLng(locationLat,locationLng);
-                    final MarkerOptions markerOptions = new MarkerOptions();
-                    markerOptions.position(riderLatLng);
-                    markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                    markerOptions.title("Rider");
-                    mMap.addMarker(markerOptions);
+                }
 
 
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
                 }
-            }
+            });
 
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
 
     }
 
@@ -530,7 +521,28 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
 
 
 
+    private void removeRequest() {
+        mStorageReference= FirebaseStorage.getInstance().getReference().child("Reports").child(key1+".jpeg");
+        if(mStorageReference!=null){
+            mStorageReference.delete();
+        }
 
+        DatabaseReference d = FirebaseDatabase.getInstance().getReference().child("Requests");
+        GeoFire geoFire = new GeoFire(d);
+        geoFire.removeLocation(key1);
+
+        ridermarker.remove();
+
+
+
+        DatabaseReference rider1 = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driver).child("CurrentRequest");
+        rider1.removeValue();
+
+
+        bottomNavigationView.setVisibility(View.GONE);
+
+
+    }
 
 
     public  void disConnectDriver(){

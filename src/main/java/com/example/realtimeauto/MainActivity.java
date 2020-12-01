@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             DatabaseReference db = FirebaseDatabase.getInstance().getReference();
-            DatabaseReference userref = db.child("Users").child("Riders").child(user.getUid());
+            DatabaseReference userref = db.child("Users").child("Drivers").child(user.getUid());
             userref.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
