@@ -479,6 +479,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
                     if (snapshot.exists()) {
                         List<Object> map = (List<Object>) snapshot.getValue();
 
+
                         if (map.get(0) != null) {
                             locationLat = Double.parseDouble(map.get(0).toString());
                         }
@@ -490,7 +491,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
                         ridermarker = mMap.addMarker(new MarkerOptions()
                         .position(riderLatLng)
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-                                .title("Rider")
+                                .title("Casualty")
                         );
 
 
@@ -527,9 +528,8 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
             mStorageReference.delete();
         }
 
-        DatabaseReference d = FirebaseDatabase.getInstance().getReference().child("Requests");
-        GeoFire geoFire = new GeoFire(d);
-        geoFire.removeLocation(key1);
+        DatabaseReference d = FirebaseDatabase.getInstance().getReference().child("Requests").child(key1).child("status");
+        d.setValue("completed");
 
         ridermarker.remove();
 
