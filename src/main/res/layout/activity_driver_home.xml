@@ -35,6 +35,15 @@
                 android:visibility="gone">
 
             </com.google.android.material.bottomnavigation.BottomNavigationView>
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:layout_height="56dp"
+                android:layout_width="match_parent"
+                android:id="@+id/reportbottomNav"
+                app:menu="@menu/reportbottomnav"
+                app:itemTextColor="#fff"
+                app:itemIconTint="#fff"
+                android:visibility="gone">
+            </com.google.android.material.bottomnavigation.BottomNavigationView>
         </RelativeLayout>
 
 

@@ -77,7 +77,8 @@ public class RequestActivity extends AppCompatActivity {
 
 
 
-
+                finish();
+                return;
 
 
             }
@@ -111,7 +112,8 @@ public class RequestActivity extends AppCompatActivity {
                 };
                 query.addListenerForSingleValueEvent(valueEventListener);
 
-
+                finish();
+                return;
 
             }
         });

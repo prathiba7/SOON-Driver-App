@@ -95,17 +95,17 @@ public class ReportActivity extends AppCompatActivity {
             }
         };
         query.addListenerForSingleValueEvent(valueEventListener);
-       /*
-
-
-*/
+      
 
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(ReportActivity.this,DriverHome.class);
 
+
                 startActivity(intent);
+
+
                 DatabaseReference riderref = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("CurrentRequest");
                 Query query=riderref.orderByChild("Status").equalTo("Requested");
                 ValueEventListener valueEventListener=new ValueEventListener() {
@@ -132,7 +132,8 @@ public class ReportActivity extends AppCompatActivity {
 
 
 
-
+            finish();
+            return;
 
             }
         });
@@ -166,7 +167,8 @@ public class ReportActivity extends AppCompatActivity {
                 };
                 query.addListenerForSingleValueEvent(valueEventListener);
 
-
+            finish();
+            return;
 
             }
         });

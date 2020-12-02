@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -29,21 +30,28 @@ public class DriverProfileCompletionActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+
                 FirebaseUser user= FirebaseAuth.getInstance().getCurrentUser();
                 String user_id=user.getUid();
-                 DatabaseReference current_user_name = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("Name");
-                 current_user_name.setValue(name.getText().toString());
-                DatabaseReference current_user_address = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("Address");
-                current_user_address.setValue(address.getText().toString());
+                if ((!name.getText().toString().equals("")) && (!address.getText().toString().equals(""))&& (!vehno.getText().toString().equals(""))) {
+                    DatabaseReference current_user_name = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("Name");
+                    current_user_name.setValue(name.getText().toString());
+                    DatabaseReference current_user_address = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("Address");
+                    current_user_address.setValue(address.getText().toString());
 
 
-                DatabaseReference current_user_vehno = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("VehicleNo");
-                current_user_vehno.setValue(vehno.getText().toString());
-                DatabaseReference dr=FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id);
-                dr.child("Available").setValue("off");
-                startActivity(new Intent(DriverProfileCompletionActivity.this,DriverHome.class));
-                finish();
-                return;
+                    DatabaseReference current_user_vehno = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("VehicleNo");
+                    current_user_vehno.setValue(vehno.getText().toString());
+                    DatabaseReference dr = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id);
+                    dr.child("Available").setValue("off");
+                    startActivity(new Intent(DriverProfileCompletionActivity.this, DriverHome.class));
+                    finish();
+                    return;
+                }
+                else{
+                    Toast.makeText(DriverProfileCompletionActivity.this, "Some fields are left blank", Toast.LENGTH_SHORT).show();
+
+                }
             }
         });
     }

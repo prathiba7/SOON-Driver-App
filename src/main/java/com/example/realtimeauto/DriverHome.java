@@ -44,6 +44,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -83,7 +85,9 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
       String key1;
     private StorageReference mStorageReference;
     BottomNavigationView bottomNavigationView;
+    BottomNavigationView reportbottomNavigationView;
      Marker ridermarker;
+    Marker drivermarker;
      Boolean check=true;
 
 
@@ -112,7 +116,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
         name = (TextView) header.findViewById(R.id.username);
         phone = (TextView) header.findViewById(R.id.userphone);
 
-
+        reportbottomNavigationView=(BottomNavigationView)findViewById(R.id.reportbottomNav);
         sw = (Switch) findViewById(R.id.switch5);
         bottomNavigationView=(BottomNavigationView)findViewById(R.id.bottomNav);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -132,7 +136,21 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
                 return true;
             }
         });
+        reportbottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch(item.getItemId()){
 
+                    case R.id.driverroute:
+                        showroute(riderLatLng,mLastLocation);
+                        break;
+                    case R.id.complete:
+                        removeRequest();
+                        break;
+                }
+                return true;
+            }
+        });
 
 
 
@@ -373,17 +391,19 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
     public void onLocationChanged(Location location) {
         mLastLocation=location;
         LatLng latLng=new LatLng(location.getLatitude(),location.getLongitude());
-        final MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
+        if(drivermarker!=null){
+            drivermarker.remove();
+        }
 
-
-
-        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher_auto));
-        markerOptions.title("driver");
+            drivermarker = mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher_auto))
+                .title("Driver")
+        );
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
 
-        mMap.addMarker(markerOptions);
+
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         final String userid=user.getUid();
 
@@ -435,9 +455,8 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
                                             String sts = snapshot.child("Status").getValue().toString();
                                             if (sts.equals("Accepted")) {
 
-                                                    getRiderLocation();
 
-
+                                                getRiderLocation();
 
                                             }
 
@@ -469,9 +488,33 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
 
 
     public  void getRiderLocation(){
-        bottomNavigationView.setVisibility(View.VISIBLE);
+        mStorageReference= FirebaseStorage.getInstance().getReference().child("Reports").child(key1+".jpeg");
+        mStorageReference.getDownloadUrl()
+                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        reportbottomNavigationView.setVisibility(View.VISIBLE);
+                        bottomNavigationView.setVisibility(View.GONE);
 
-        DatabaseReference assignedRiderPickupLocationRef=FirebaseDatabase.getInstance().getReference().child("Requests").child(key1).child("l");
+
+
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                bottomNavigationView.setVisibility(View.VISIBLE);
+                reportbottomNavigationView.setVisibility(View.GONE);
+
+
+
+
+            }
+        });
+
+        if(check==true) {
+
+            DatabaseReference assignedRiderPickupLocationRef = FirebaseDatabase.getInstance().getReference().child("Requests").child(key1).child("l");
 
             assignedRiderPickupLocationRef.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -487,14 +530,15 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
                             locationLng = Double.parseDouble(map.get(1).toString());
                         }
                         riderLatLng = new LatLng(locationLat, locationLng);
+                        if (ridermarker != null) {
+                            ridermarker.remove();
+                        }
 
                         ridermarker = mMap.addMarker(new MarkerOptions()
-                        .position(riderLatLng)
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                                .position(riderLatLng)
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
                                 .title("Casualty")
                         );
-
-
 
 
                     }
@@ -506,6 +550,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
 
                 }
             });
+        }
 
 
     }
@@ -527,19 +572,13 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
         if(mStorageReference!=null){
             mStorageReference.delete();
         }
-
-        DatabaseReference d = FirebaseDatabase.getInstance().getReference().child("Requests").child(key1).child("status");
-        d.setValue("completed");
-
         ridermarker.remove();
-
-
-
-        DatabaseReference rider1 = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driver).child("CurrentRequest");
-        rider1.removeValue();
-
+        DatabaseReference rider1 = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driver).child("CurrentRequest").child(key1).child("Status");
+        rider1.setValue("completed");
+        check=false;
 
         bottomNavigationView.setVisibility(View.GONE);
+        reportbottomNavigationView.setVisibility(View.GONE);
 
 
     }
