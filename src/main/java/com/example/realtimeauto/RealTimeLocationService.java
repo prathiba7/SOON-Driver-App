@@ -42,8 +42,6 @@ public class RealTimeLocationService extends Service implements LocationListener
 
 
 
-    public RealTimeLocationService() {
-    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -131,9 +129,15 @@ public class RealTimeLocationService extends Service implements LocationListener
                                                     .addOnSuccessListener(new OnSuccessListener<Uri>() {
                                                         @Override
                                                         public void onSuccess(Uri uri) {
-                                                            Intent intent = new Intent(RealTimeLocationService.this, ReportActivity.class)
+
+                                                            Intent intent1 = new Intent(RealTimeLocationService.this, ReportActivity.class)
                                                                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                            startActivity(intent);
+
+
+                                                            startActivity(intent1);
+
+
+
 
 
 

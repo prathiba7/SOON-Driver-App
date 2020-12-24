@@ -8,6 +8,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -15,10 +16,10 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -74,7 +75,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
     Toolbar toolbar;
     View header;
     TextView name, phone;
-    Switch sw;
+    Switch togle;
     String driver;
     private GoogleMap mMap;
     Location mLastLocation;
@@ -90,6 +91,10 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
     Marker drivermarker;
      Boolean check=true;
 
+     FirebaseUser user  = FirebaseAuth.getInstance().getCurrentUser();
+    String user_id=user.getUid();
+     DatabaseReference dr;
+
 
 
 
@@ -97,7 +102,7 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
     double locationLat=0;
     double locationLng=0;
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,142 +112,53 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(toolbar);
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+
         frameLayout = (FrameLayout) findViewById(R.id.frame);
         frameMap = (FrameLayout) findViewById(R.id.map);
         nav = (FrameLayout) findViewById(R.id.frame1);
-        header = navigationView.getHeaderView(0);
-        imageView = (ImageView) header.findViewById(R.id.nav_img);
-        name = (TextView) header.findViewById(R.id.username);
-        phone = (TextView) header.findViewById(R.id.userphone);
-
-        reportbottomNavigationView=(BottomNavigationView)findViewById(R.id.reportbottomNav);
-        sw = (Switch) findViewById(R.id.switch5);
-        bottomNavigationView=(BottomNavigationView)findViewById(R.id.bottomNav);
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch(item.getItemId()){
-                    case R.id.driverdet:
-                        RiderDetails();
-                        break;
-                    case R.id.driverroute:
-                        showroute(riderLatLng,mLastLocation);
-                        break;
-                    case R.id.complete:
-                        removeRequest();
-                        break;
-                }
-                return true;
-            }
-        });
-        reportbottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch(item.getItemId()){
-
-                    case R.id.driverroute:
-                        showroute(riderLatLng,mLastLocation);
-                        break;
-                    case R.id.complete:
-                        removeRequest();
-                        break;
-                }
-                return true;
-            }
-        });
 
 
 
-        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        final Intent intentlocservice = new Intent(this, RealTimeLocationService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intentlocservice);
-        }
 
-        final Intent intentlocs = new Intent(this, RealTimeLocationService.class);
-        startService(intentlocs);
 
-        mapFragment.getMapAsync(this);
-        frameMap.setVisibility(View.GONE);
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        final String user_id = user.getUid();
-        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        togle = (Switch) findViewById(R.id.switch5);
+
+        user_id = user.getUid();
+        dr = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("Available");
+
+        //toggle switch
+        togle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
 
-                    DatabaseReference dr = FirebaseDatabase.getInstance().getReference();
-
-                    dr.child("Users").child("Drivers").child(user_id).child("Available").setValue("on");
-
+                    dr.setValue("on");
                     frameLayout.setVisibility(View.GONE);
                     frameMap.setVisibility(View.VISIBLE);
 
                 } else {
-                    DatabaseReference dr = FirebaseDatabase.getInstance().getReference();
-                    dr.child("Users").child("Drivers").child(user_id).child("Available").setValue("off");
 
+                    dr.setValue("off");
                     frameLayout.setVisibility(View.VISIBLE);
                     frameMap.setVisibility(View.GONE);
                     disConnectDriver();
-
-
                 }
 
             }
         });
-        DatabaseReference dr = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("Available");
-        dr.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue().equals("on")){
-                    frameMap.setVisibility(View.VISIBLE);
-                    frameLayout.setVisibility(View.GONE);
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                drawer.closeDrawer(GravityCompat.START);
-            }
-        });
-        toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
 
 
-        DatabaseReference dr1 = FirebaseDatabase.getInstance().getReference();
-
-        ((com.google.firebase.database.DatabaseReference) dr1).child("Users").child("Drivers").child(user_id).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()){
-                String uname = snapshot.child("Name").getValue().toString();
-                String phno = snapshot.child("Phoneno").getValue().toString();
-                name.setText(uname);
-                phone.setText(phno);}
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+        //navigation bar
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        header = navigationView.getHeaderView(0);
+        imageView = (ImageView) header.findViewById(R.id.nav_img);
+        name = (TextView) header.findViewById(R.id.username);
+        phone = (TextView) header.findViewById(R.id.userphone);
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 int id = menuItem.getItemId();
                 if (id == R.id.nav_Home) {
-                    DatabaseReference dr = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("Available");
                     dr.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -274,6 +190,112 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
                 return true;
             }
         });
+
+        //side navigation name
+        DatabaseReference dr1 = FirebaseDatabase.getInstance().getReference();
+        ((com.google.firebase.database.DatabaseReference) dr1).child("Users").child("Drivers").child(user_id).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    String uname = snapshot.child("Name").getValue().toString();
+                    String phno = snapshot.child("Phoneno").getValue().toString();
+                    name.setText(uname);
+                    phone.setText(phno);}
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        //bottom navigation bar
+        bottomNavigationView=(BottomNavigationView)findViewById(R.id.bottomNav);
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch(item.getItemId()){
+                    case R.id.driverdet:
+                        RiderDetails();
+                        break;
+
+                    case R.id.complete:
+                        removeRequest();
+                        break;
+                    case R.id.driverroute:
+                        showroute(riderLatLng,mLastLocation);
+                        break;
+
+
+                }
+                return true;
+            }
+        });
+
+
+        //bottum navigation bar for report accident
+        reportbottomNavigationView=(BottomNavigationView)findViewById(R.id.reportbottomNav);
+        reportbottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch(item.getItemId()){
+
+                    case R.id.driverroute:
+                        showroute(riderLatLng,mLastLocation);
+                        break;
+                    case R.id.complete:
+                        removeRequest();
+                        break;
+                }
+                return true;
+            }
+        });
+
+
+        //map activity
+        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+        frameMap.setVisibility(View.GONE);
+
+
+        DatabaseReference dr = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("Available");
+        dr.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue().equals("on")){
+                    frameMap.setVisibility(View.VISIBLE);
+                    frameLayout.setVisibility(View.GONE);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawer.closeDrawer(GravityCompat.START);
+            }
+        });
+        toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+
+
+
+
+        final Intent intentlocservice = new Intent(this, RealTimeLocationService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intentlocservice);
+        }
+
+        final Intent intentlocs = new Intent(this, RealTimeLocationService.class);
+        startService(intentlocs);
 
 
     }
@@ -308,8 +330,6 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
         }
         buildApiClient();
         mMap.setMyLocationEnabled(true);
-
-
     }
 
     protected synchronized void buildApiClient() {
@@ -343,6 +363,142 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation=location;
+        LatLng latLng=new LatLng(location.getLatitude(),location.getLongitude());
+        if(drivermarker!=null){
+            drivermarker.remove();
+        }
+        drivermarker = mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher_auto))
+                .title("Driver")
+        );
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
+
+
+
+
+        DatabaseReference dr1 = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("Available");
+        if(dr1!=null) {
+            dr1.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        if (snapshot.getValue().equals("on")) {
+                            togle.setChecked(true);
+                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("DriverAvailable");
+                            GeoFire geoFire = new GeoFire(ref);
+                            geoFire.setLocation(user_id, new GeoLocation(mLastLocation.getLatitude(),mLastLocation.getLongitude()));
+                        }else{
+                            togle.setChecked(false);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+        }
+
+
+        DatabaseReference d = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("CurrentRequest");
+        Query query = d.orderByChild("Status").equalTo("Accepted");
+        if(d!=null) {
+
+            ValueEventListener valueEventListener1 = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        for (DataSnapshot ds : snapshot.getChildren()) {
+                            key1 = ds.getKey();
+                            if (key1 != null) {
+                                DatabaseReference checksts = FirebaseDatabase.getInstance().getReference();
+                                checksts.child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key1).addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        if (snapshot.exists()) {
+                                            String sts = snapshot.child("Status").getValue().toString();
+                                            if (sts.equals("Accepted")) {
+                                                processing();
+                                            }
+
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            };
+            query.addListenerForSingleValueEvent(valueEventListener1);
+        }
+
+
+
+    }
+
+    private void processing() {
+
+        Handler handler = new Handler();
+        Toast.makeText(getApplicationContext(), "please wait processing...", Toast.LENGTH_SHORT).show();
+
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+
+                    DatabaseReference ref=FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key1).child("Status");
+                    if(ref!=null){
+                        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                String status=snapshot.getValue().toString();
+                                if(status.equals("Assigned")){
+                                    getRiderLocation();
+                                }
+                                else{
+                                    Intent intent = new Intent(DriverHome.this, driverfound.class)
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(intent);
+                                    finish();
+                                    return;
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    }
+
+
+                }
+
+
+
+            },10000);
+
+    }
+
+
+
 
     public void  RiderDetails(){
 
@@ -387,102 +543,6 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
 
 
     }
-    @Override
-    public void onLocationChanged(Location location) {
-        mLastLocation=location;
-        LatLng latLng=new LatLng(location.getLatitude(),location.getLongitude());
-        if(drivermarker!=null){
-            drivermarker.remove();
-        }
-
-            drivermarker = mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher_auto))
-                .title("Driver")
-        );
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
-
-
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        final String userid=user.getUid();
-
-        DatabaseReference dr1 = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(userid).child("Available");
-        if(dr1!=null) {
-            dr1.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        if (snapshot.getValue().equals("on")) {
-                            sw.setChecked(true);
-                            String DriverId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-                            DatabaseReference ref = FirebaseDatabase.getInstance().getReference("DriverAvailable");
-                            GeoFire geoFire = new GeoFire(ref);
-                            geoFire.setLocation(DriverId, new GeoLocation(mLastLocation.getLatitude(),mLastLocation.getLongitude()));
-                        }else{
-                            sw.setChecked(false);
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-
-        }
-
-
-
-         driver=FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DatabaseReference rider = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driver).child("CurrentRequest");
-
-        Query query=rider.orderByChild("Status").equalTo("Accepted");
-        if (rider!=null) {
-            ValueEventListener valueEventListener1 = new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        for (DataSnapshot ds : snapshot.getChildren()) {
-                            key1 = ds.getKey();
-                            if (key1 != null) {
-                                DatabaseReference checksts = FirebaseDatabase.getInstance().getReference();
-                                checksts.child("Users").child("Drivers").child(driver).child("CurrentRequest").child(key1).addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        if (snapshot.exists()) {
-                                            String sts = snapshot.child("Status").getValue().toString();
-                                            if (sts.equals("Accepted")) {
-
-
-                                                getRiderLocation();
-
-                                            }
-
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-
-                            }
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            };
-            query.addListenerForSingleValueEvent(valueEventListener1);
-        }
-
-    }
 
 
 
@@ -495,27 +555,17 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
                     public void onSuccess(Uri uri) {
                         reportbottomNavigationView.setVisibility(View.VISIBLE);
                         bottomNavigationView.setVisibility(View.GONE);
-
-
-
-
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 bottomNavigationView.setVisibility(View.VISIBLE);
                 reportbottomNavigationView.setVisibility(View.GONE);
-
-
-
-
             }
         });
-
         if(check==true) {
 
             DatabaseReference assignedRiderPickupLocationRef = FirebaseDatabase.getInstance().getReference().child("Requests").child(key1).child("l");
-
             assignedRiderPickupLocationRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -566,15 +616,23 @@ public class DriverHome extends AppCompatActivity implements OnMapReadyCallback,
 
 
 
-
-    private void removeRequest() {
+    public void removeRequest() {
         mStorageReference= FirebaseStorage.getInstance().getReference().child("Reports").child(key1+".jpeg");
-        if(mStorageReference!=null){
-            mStorageReference.delete();
-        }
+        mStorageReference.getDownloadUrl()
+                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                       mStorageReference.delete();
+                    }
+                });
+
         ridermarker.remove();
-        DatabaseReference rider1 = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driver).child("CurrentRequest").child(key1).child("Status");
-        rider1.setValue("completed");
+
+        DatabaseReference rider1 = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(user_id).child("CurrentRequest").child(key1).child("Status");
+        if(rider1!=null){
+            rider1.setValue("completed");
+        }
+
         check=false;
 
         bottomNavigationView.setVisibility(View.GONE);
